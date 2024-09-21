@@ -2,12 +2,12 @@ import Mathlib
 
 open Finset
 
-def generalDensityOfSquares (n : ℕ) (f₁ f₂ : ℕ → unitInterval) : ℝ :=
+def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → unitInterval) : ℝ :=
   ∑ x ∈ (range n), ∑ r ∈ (range (n ^ (1/3))), ∑ h ∈ (range (n ^ (1/100))),
   (f₁ x) * (f₂ (x + (r + h)^2))
 
-def densityOfSquares (n : ℕ) (f : ℕ → unitInterval) : ℝ :=
-  generalDensityOfSquares n f f
+def countOfSquares (n : ℕ) (f : ℕ → unitInterval) : ℝ :=
+  generalizedCountOfSquares n f f
 
 def containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
 
@@ -16,13 +16,13 @@ def zero {α : Type} : α → unitInterval := 0
 def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → unitInterval :=
   S.piecewise one zero
 
-lemma zero_density_if_set_is_square_difference_free (n : ℕ) (S : Finset ℕ)
+lemma square_difference_free_set_has_zero_countOfSquares (n : ℕ) (S : Finset ℕ)
     (squareDifferenceFree : ¬ containsSquareDifference S) :
-    densityOfSquares n S.indicator = 0 := by
+    countOfSquares n S.indicator = 0 := by
 
   unfold containsSquareDifference at squareDifferenceFree
   push_neg at squareDifferenceFree
-  unfold densityOfSquares generalDensityOfSquares
+  unfold countOfSquares generalizedCountOfSquares
 
   refine Finset.sum_eq_zero ?_
   intros x _
