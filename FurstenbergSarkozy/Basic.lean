@@ -43,7 +43,21 @@ lemma square_difference_free_set_has_zero_countOfSquares (n : ℕ) (S : Finset �
     right
     exact if_neg (squareDifferenceFree (r + h) x xInS)
 
+lemma uniform_δ_indicator_has_sqr_δ_density_of_countOfSquares
+    (n : ℕ) (δ : unitInterval) : countOfSquares n (δ • (range n).indicator) = δ ^ 2 * n ^ 2 := by
+  dsimp [countOfSquares, generalizedCountOfSquares, indicator, piecewise, id']
+  norm_cast
+  simp
+  have : (range (n - ⌈ ((n : ℝ) ^ (1/3 : ℝ)) ⌉₊)) ⊆ (range n) := range_subset.mpr (by omega)
+  -- apply sum_subset this ?h
+  sorry
+
+-- approach should be the following: do cases. if we have a single square difference in S, then we are done.
+-- otherwise, we can go to a denser subset by the density increment argument
+-- and we show that recursively calling furstenberg_sarkozy terminates because δ increases
+-- and is at most one
+
 theorem furstenberg_sarkozy :
-    ∀ α : ℝ, ∃ n₀ : ℕ, ∀ n : ℕ, ∀ S ⊆ (range n),
-    n ≥ n₀ ∧ S.card ≥ α * n → ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S :=
+    ∀ δ : ℝ, ∃ n₀ : ℕ, ∀ n : ℕ, ∀ S ⊆ (range n),
+    n ≥ n₀ ∧ S.card ≥ δ * n → ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S :=
   sorry
