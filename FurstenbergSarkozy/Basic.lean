@@ -2,19 +2,19 @@ import Mathlib
 
 open Finset
 
-def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → unitInterval) : ℝ :=
-  ∑ x ∈ (range n), ∑ r ∈ (range (n ^ (1/3))), ∑ h ∈ (range (n ^ (1/100))),
-  (f₁ x) * (f₂ (x + (r + h)^2))
+noncomputable def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → unitInterval) : ℝ :=
+  ∑ x ∈ (range n),
+  ∑ r ∈ range (⌈(n ^ (1/3 : ℝ) : ℝ)⌉₊),
+  ∑ h ∈ range (⌈(n ^ (1/100 : ℝ) : ℝ)⌉₊), (f₁ x) * (f₂ (x + (r + h)^2))
 
-def countOfSquares (n : ℕ) (f : ℕ → unitInterval) : ℝ :=
+noncomputable def countOfSquares (n : ℕ) (f : ℕ → unitInterval) : ℝ :=
   generalizedCountOfSquares n f f
 
 def containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
 
-def one {α : Type} : α → unitInterval := 1
-def zero {α : Type} : α → unitInterval := 0
+def id' {α : Type} (x : unitInterval) : α → unitInterval := fun _ => x
 def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → unitInterval :=
-  S.piecewise one zero
+  S.piecewise (id' 1) (id' 0)
 
 lemma square_difference_free_set_has_zero_countOfSquares (n : ℕ) (S : Finset ℕ)
     (squareDifferenceFree : ¬ containsSquareDifference S) :
@@ -24,25 +24,23 @@ lemma square_difference_free_set_has_zero_countOfSquares (n : ℕ) (S : Finset �
   push_neg at squareDifferenceFree
   unfold countOfSquares generalizedCountOfSquares
 
-  refine Finset.sum_eq_zero ?_
+  refine sum_eq_zero ?_
   intros x _
-  refine Finset.sum_eq_zero ?_
+  refine sum_eq_zero ?_
   intros r _
-  refine Finset.sum_eq_zero ?_
+  refine sum_eq_zero ?_
   intros h _
 
   by_cases (x ∈ S)
   case neg xNotInS =>
     unfold indicator
-    rw [mul_eq_zero]
+    simp
     left
-    norm_num
     exact if_neg xNotInS
   case pos xInS =>
     unfold indicator
-    rw [mul_eq_zero]
-    right
     simp
+    right
     exact if_neg (squareDifferenceFree (r + h) x xInS)
 
 theorem furstenberg_sarkozy :
