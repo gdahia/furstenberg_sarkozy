@@ -142,7 +142,10 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
 -- denser subset by the density increment argument and we show that recursively
 -- calling furstenberg_sarkozy terminates because δ increases and is at most one
 
+noncomputable def unitInterval' := (Set.Ioc (0 : ℝ) (1 : ℝ))
+
 theorem furstenberg_sarkozy :
-    ∀ δ : ℝ, ∃ n₀ : ℕ, ∀ n : ℕ, ∀ S ⊆ (range n),
-    n ≥ n₀ ∧ S.card ≥ δ * n → ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S :=
+    ∀ δ : unitInterval', ∃ n₀ : ℕ, ∀ n : ℕ, n ≥ n₀ →
+    ∀ S ⊆ (mrange n), (δ : ℝ) * n ≤ S.card →
+    S.containsSquareDifference :=
   sorry
