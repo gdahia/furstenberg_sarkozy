@@ -16,14 +16,14 @@ noncomputable def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → ℝ) 
 noncomputable def countOfSquares (n : ℕ) (f : ℕ → ℝ) : ℝ :=
   generalizedCountOfSquares n f f
 
-def containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
+def Finset.containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
 
 def id' {α : Type} (x : ℝ) : α → ℝ := fun _ => x
 def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → ℝ :=
   S.piecewise (id' 1) (id' 0)
 
 lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ)
-     : countOfSquares n S.indicator ≠ 0 → containsSquareDifference S := by
+     : countOfSquares n S.indicator ≠ 0 → S.containsSquareDifference := by
   contrapose!
   intro squareDifferenceFree
 
