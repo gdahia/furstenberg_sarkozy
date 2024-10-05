@@ -50,15 +50,18 @@ lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ
     right
     exact if_neg (squareDifferenceFree (r + h) x xInS)
 
+noncomputable def maxOfGeneralizedCountOfSquares (n₁ n₂ n₃ : ℕ) :=
+  n₁ * (upperBoundOnr n₂) * (upperBoundOnh n₃)
+noncomputable def maxOfCountOfSquares (n : ℕ) := maxOfGeneralizedCountOfSquares n n n
 noncomputable def almostN (n : ℕ) := n - (upperBoundOnr n + upperBoundOnh n)^2
-noncomputable def almostMaxCountOfSquares (n : ℕ) :=
-  (almostN n) * (upperBoundOnr n) * (upperBoundOnh n)
+noncomputable def almostMaxOfCountOfSquares (n : ℕ) :=
+  maxOfGeneralizedCountOfSquares (almostN n) n n
 
 lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
     {n : ℕ} {δ : ℝ} (δ_in_unit_interval : 0 ≤ δ ∧ δ ≤ 1)
     (n_is_large : (upperBoundOnr n + upperBoundOnh n)^2 < n) :
-    δ ^ 2 * (almostMaxCountOfSquares n) ≤ countOfSquares n (δ • (mrange n).indicator) := by
-  dsimp [almostMaxCountOfSquares, countOfSquares, generalizedCountOfSquares, indicator]
+    δ ^ 2 * (almostMaxOfCountOfSquares n) ≤ countOfSquares n (δ • (mrange n).indicator) := by
+  dsimp [almostMaxOfCountOfSquares, countOfSquares, generalizedCountOfSquares, indicator]
   dsimp [piecewise, id']
   simp only [mul_assoc, ite_mul]
   simp
