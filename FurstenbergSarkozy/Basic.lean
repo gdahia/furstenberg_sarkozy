@@ -80,13 +80,39 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
       simp_rw [← ge_iff_le]
       exact reduction
 
-    dsimp [innerTerm]
-    have const_sum_for_range :
-        ∀ x ∈ range' almost_n, ∀ y ∈ range' (upperBoundOny n), ∀ z ∈ range' (upperBoundOnz n),
-        x + (y + z)^2 < n := by
+    simp [innerTerm]
+    rw [← sum_product' (f := fun x y => ∑ z ∈ range' (upperBoundOnz n), if x + (y + z)^2 ≤ n then δ * δ else 0)]
+    rw [← sum_product' (s := (range' almost_n ×ˢ range' (upperBoundOny n))) (t := range' (upperBoundOnz n)) (f := fun x z => if x.1 + (x.2 + z)^2 ≤ n then δ * δ else 0)]
+    rw [sum_ite_of_true]
+    · simp
+      ring_nf
       sorry
+    · intros xs hxs
+      simp at hxs
+      set x := xs.1.1
+      set y := xs.1.2
+      set z := xs.2
+      dsimp [range'] at hxs
+      simp only [mem_Ioc] at hxs
+      let xnneg := hxs.1.1.1
+      let hx := hxs.1.1.2
+      let hy := hxs.1.2.2
+      let hz := hxs.2.2
 
-    sorry
+      calc x + (y + z)^2
+        _ ≤ almost_n + (y + z)^2 := by omega
+        _ ≤ almost_n + (upperBoundOny n + z)^2 := by
+          simp
+          apply Nat.pow_le_pow_of_le_left
+          omega
+        _ ≤ almost_n + (upperBoundOny n + upperBoundOnz n)^2 := by
+          simp
+          apply Nat.pow_le_pow_of_le_left
+          omega
+
+      simp [almost_n, upperBoundOny, upperBoundOnz, almostN]
+      simp [upperBoundOny, upperBoundOnz] at n_is_large
+      omega
 
   dsimp [almostMaxOfCountOfSquares, countOfSquares, generalizedCountOfSquares, indicator]
   dsimp [Set.indicator, const]
@@ -115,7 +141,8 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
     omega
 
   rw [ge_iff_le]
-  apply sum_le_sum_of_subset_of_nonneg (range'_subset almost_n_le_n) ?_
+  -- apply sum_le_sum_of_subset_of_nonneg (range'_subset almost_n_le_n) ?_
+  sorry
 
 -- approach should be the following: do cases. if we have not many fewer than
 -- expected square differences in S, then we are done. otherwise, we can go to a
