@@ -68,7 +68,7 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
   let innerTerm (x : ℕ) :=
     ∑ y ∈ range' (upperBoundOny n),
       ∑ z ∈ range' (upperBoundOnz n),
-        if x + (y + z) ^ 2 < n then δ * δ else 0
+        if x + (y + z) ^ 2 ≤ n then δ * δ else 0
 
   let almost_n := almostN n
   suffices reduction :
