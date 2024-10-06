@@ -16,7 +16,8 @@ noncomputable def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → ℝ) 
 noncomputable def countOfSquares (n : ℕ) (f : ℕ → ℝ) : ℝ :=
   generalizedCountOfSquares n f f
 
-def Finset.containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
+def Finset.containsSquareDifference (S : Finset ℕ) : Prop :=
+  ∃ d : {d : ℕ // d > 0}, ∃ a ∈ S, a + d ^ 2 ∈ S
 
 noncomputable def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → ℝ :=
   S.toSet.indicator (const α 1)
@@ -33,21 +34,24 @@ lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ
   apply sum_eq_zero
   intros x _
   apply sum_eq_zero
-  intros r _
+  intros y hy
   apply sum_eq_zero
-  intros h _
+  intros z hz
 
   by_cases (x ∈ S)
   case neg xNotInS =>
     unfold indicator
     simp
     left
-    exact if_neg xNotInS
+    exact xNotInS
   case pos xInS =>
     unfold indicator
     simp
     right
-    exact if_neg (squareDifferenceFree (r + h) x xInS)
+    simp at hy
+    simp at hz
+    have ypz_pos : 0 < y + z := by omega
+    exact (squareDifferenceFree ⟨ y + z, ypz_pos ⟩ x xInS)
 
 noncomputable def maxOfGeneralizedCountOfSquares (n₁ n₂ n₃ : ℕ) :=
   n₁ * (upperBoundOny n₂) * (upperBoundOnz n₃)
