@@ -1,26 +1,25 @@
 import Mathlib
 
-open Finset
+open Finset Function
 
-def mrange (n : ℕ) := map ⟨fun x => x + 1, add_left_injective 1⟩ (range n)
+def range' (n : ℕ) : Finset ℕ := Ioc 0 n
 
-noncomputable def upperBoundOnr (n : ℕ) := ⌈(n ^ (1/4 : ℝ) : ℝ)⌉₊
+noncomputable def upperBoundOny (n : ℕ) := ⌈(n ^ (1/3 : ℝ) : ℝ)⌉₊
 
-noncomputable def upperBoundOnh (n : ℕ) := ⌈(n ^ (1/100 : ℝ) : ℝ)⌉₊
+noncomputable def upperBoundOnz (n : ℕ) := ⌈(n ^ (1/100 : ℝ) : ℝ)⌉₊
 
 noncomputable def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → ℝ) : ℝ :=
-  ∑ x ∈ (mrange n),
-  ∑ r ∈ mrange (upperBoundOnr n),
-  ∑ h ∈ mrange (upperBoundOnh n), (f₁ x) * (f₂ (x + (r + h)^2))
+  ∑ x ∈ range' n,
+  ∑ y ∈ range' (upperBoundOny n),
+  ∑ z ∈ range' (upperBoundOnz n), (f₁ x) * (f₂ (x + (y + z)^2))
 
 noncomputable def countOfSquares (n : ℕ) (f : ℕ → ℝ) : ℝ :=
   generalizedCountOfSquares n f f
 
 def Finset.containsSquareDifference (S : Finset ℕ) : Prop := ∃ d : ℕ, ∃ a ∈ S, a + d ^ 2 ∈ S
 
-def id' {α : Type} (x : ℝ) : α → ℝ := fun _ => x
-def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → ℝ :=
-  S.piecewise (id' 1) (id' 0)
+noncomputable def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → ℝ :=
+  S.toSet.indicator (const α 1)
 
 lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ)
      : countOfSquares n S.indicator ≠ 0 → S.containsSquareDifference := by
@@ -29,7 +28,7 @@ lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ
 
   unfold containsSquareDifference at squareDifferenceFree
   push_neg at squareDifferenceFree
-  unfold countOfSquares generalizedCountOfSquares
+  unfold countOfSquares generalizedCountOfSquares range'
 
   apply sum_eq_zero
   intros x _
@@ -51,9 +50,9 @@ lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ
     exact if_neg (squareDifferenceFree (r + h) x xInS)
 
 noncomputable def maxOfGeneralizedCountOfSquares (n₁ n₂ n₃ : ℕ) :=
-  n₁ * (upperBoundOnr n₂) * (upperBoundOnh n₃)
+  n₁ * (upperBoundOny n₂) * (upperBoundOnz n₃)
 noncomputable def maxOfCountOfSquares (n : ℕ) := maxOfGeneralizedCountOfSquares n n n
-noncomputable def almostN (n : ℕ) := n - (upperBoundOnr n + upperBoundOnh n)^2
+noncomputable def almostN (n : ℕ) := n - (upperBoundOny n + upperBoundOnz n)^2
 noncomputable def almostMaxOfCountOfSquares (n : ℕ) :=
   maxOfGeneralizedCountOfSquares (almostN n) n n
 
@@ -148,7 +147,7 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
 noncomputable def unitInterval' := (Set.Ioc (0 : ℝ) (1 : ℝ))
 
 theorem furstenberg_sarkozy :
-    ∀ δ : unitInterval', ∃ n₀ : ℕ, ∀ n : ℕ, n ≥ n₀ →
-    ∀ S ⊆ (mrange n), (δ : ℝ) * n ≤ S.card →
+    ∀ δ ∈ unitInterval', ∃ n₀ : ℕ, ∀ n : ℕ, n ≥ n₀ →
+    ∀ S ⊆ (range' n), δ * n ≤ S.card →
     S.containsSquareDifference :=
   sorry
