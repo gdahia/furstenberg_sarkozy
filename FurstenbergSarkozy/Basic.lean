@@ -81,8 +81,7 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
       exact reduction
 
     simp [innerTerm]
-    rw [← sum_product' (f := fun x y => ∑ z ∈ range' (upperBoundOnz n), if x + (y + z)^2 ≤ n then δ * δ else 0)]
-    rw [← sum_product' (s := (range' almost_n ×ˢ range' (upperBoundOny n))) (t := range' (upperBoundOnz n)) (f := fun x z => if x.1 + (x.2 + z)^2 ≤ n then δ * δ else 0)]
+    rw [← sum_product' (s := range' almost_n), ← sum_product' (s := (range' almost_n ×ˢ range' (upperBoundOny n)))]
     rw [sum_ite_of_true]
     · simp
       ring_nf
