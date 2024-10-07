@@ -81,11 +81,16 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
       exact reduction
 
     simp [innerTerm]
-    rw [← sum_product' (s := range' almost_n), ← sum_product' (s := (range' almost_n ×ˢ range' (upperBoundOny n)))]
-    rw [sum_ite_of_true]
+    rw [← sum_product' (s := range' almost_n)]
+    rw [← sum_product' (s := (range' almost_n ×ˢ range' (upperBoundOny n))), sum_ite_of_true]
     · simp
       ring_nf
-      sorry
+      simp_rw [mul_assoc]
+      simp
+      left
+      norm_cast
+      simp [range', almostMaxOfCountOfSquares, maxOfGeneralizedCountOfSquares]
+      ring_nf
     · intros xs hxs
       simp at hxs
       set x := xs.1.1
