@@ -62,8 +62,7 @@ noncomputable def almostN (n : ℕ) := n - (upperBoundOny n + upperBoundOnz n)^2
 noncomputable def almostMaxOfCountOfSquares (n : ℕ) :=
   maxOfGeneralizedCountOfSquares (almostN n) n n
 
-lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
-    {n : ℕ} {δ : ℝ}
+lemma δ_uniform_vs_δ_uniform_lower_bound {n : ℕ} {δ : ℝ}
     (n_is_large : (upperBoundOny n + upperBoundOnz n)^2 ≤ n) :
     δ ^ 2 * (almostMaxOfCountOfSquares n) ≤ countOfSquares n (δ • (range' n).indicator) := by
   simp only [countOfSquares, generalizedCountOfSquares, range', indicator,
@@ -100,8 +99,9 @@ lemma uniform_δ_indicator_at_least_sqr_δ_density_of_countOfSquares_minus_error
     refine mul_nonneg (mul_nonneg (sq_nonneg δ) ?_) ?_ <;>
       exact Set.indicator_nonneg (by simp) _
 
-lemma uniform_δ_indicator_at_most_sqr_δ_density_of_countOfSquares
-    (n : ℕ) (δ : ℝ) :
+-- TODO: rewrite this in a way that works for every pair of functions whose sum
+-- in range' n is δ * n? useful to apply as upper bound for every combination
+lemma δ_uniform_vs_δ_uniform_upper_bound (n : ℕ) (δ : ℝ) :
     countOfSquares n (δ • (range' n).indicator) ≤ δ ^ 2 * (maxOfCountOfSquares n) := by
   simp only [countOfSquares, maxOfCountOfSquares, maxOfGeneralizedCountOfSquares,
               generalizedCountOfSquares, indicator, range', coe_Ioc, const_one,
@@ -125,6 +125,22 @@ lemma uniform_δ_indicator_at_most_sqr_δ_density_of_countOfSquares
     simp only [Nat.cast_mul, mul_eq_mul_left_iff, sup_eq_left, mul_eq_zero, Nat.cast_eq_zero]
     left
     exact sq_nonneg δ
+
+lemma indicator_of_set_vs_δ_uniform_lower_bound
+    {n : ℕ} {δ : ℝ} {S : Finset ℕ} (S_subset_of_range'_n : S ⊆ range' n)
+    (S_is_δ_dense : δ * n ≤ S.card) (n_is_large : (upperBoundOny n + upperBoundOnz n)^2 ≤ n) :
+    δ ^ 2 * (almostMaxOfCountOfSquares n) ≤
+    generalizedCountOfSquares n S.indicator (δ • (range' n).indicator) := by
+  simp only [countOfSquares, generalizedCountOfSquares, range', indicator,
+              Pi.smul_apply, smul_eq_mul, coe_Ioc]
+  have almost_sub : Ioc 0 (almostN n) ⊆ Ioc 0 n := by
+    simp only [almostN, Ioc_subset_Ioc_right, Nat.sub_le]
+  apply le_trans
+  rotate_left
+  -- instead of restricting the x sum to any interval, restrict it to S
+  · sorry
+  · sorry
+  · sorry
 
 -- approach should be the following: do cases. if we have not many fewer than
 -- expected square differences in S, then we are done. otherwise, we can go to a
