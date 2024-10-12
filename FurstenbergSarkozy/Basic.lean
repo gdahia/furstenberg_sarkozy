@@ -133,13 +133,22 @@ lemma indicator_of_set_vs_δ_uniform_lower_bound
     generalizedCountOfSquares n S.indicator (δ • (range' n).indicator) := by
   simp only [countOfSquares, generalizedCountOfSquares, range', indicator,
               Pi.smul_apply, smul_eq_mul, coe_Ioc]
-  have almost_sub : Ioc 0 (almostN n) ⊆ Ioc 0 n := by
-    simp only [almostN, Ioc_subset_Ioc_right, Nat.sub_le]
+  -- TODO: do almost_sub but with S ∩ range' (almostN n)
   apply le_trans
   rotate_left
-  -- instead of restricting the x sum to any interval, restrict it to S
-  · sorry
-  · sorry
+  · apply sum_le_sum_of_subset_of_nonneg S_subset_of_range'_n
+    intro x _ hxS
+    simp only [const_one]
+    apply le_of_eq
+    rw [sum_eq_card_nsmul]
+    rotate_left
+    · intro _ _
+      rw [sum_eq_card_nsmul]
+      intro _ _
+      rw [mul_eq_zero]
+      left
+      simpa only [Set.indicator_apply_eq_zero, mem_coe, Pi.one_apply, one_ne_zero, imp_false]
+    · simp only [Nat.card_Ioc, tsub_zero, smul_zero]
   · sorry
 
 -- approach should be the following: do cases. if we have not many fewer than
