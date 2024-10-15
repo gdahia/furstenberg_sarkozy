@@ -127,29 +127,96 @@ lemma δ_uniform_vs_δ_uniform_upper_bound (n : ℕ) (δ : ℝ) :
     exact sq_nonneg δ
 
 lemma indicator_of_set_vs_δ_uniform_lower_bound
-    {n : ℕ} {δ : ℝ} {S : Finset ℕ} (S_subset_of_range'_n : S ⊆ range' n)
+    {n : ℕ} {δ : ℝ} {S : Finset ℕ} (S_subset_of_range'_n : S ⊆ range' n) (δ_nonneg : 0 ≤ δ)
     (S_is_δ_dense : δ * n ≤ S.card) (n_is_large : (upperBoundOny n + upperBoundOnz n)^2 ≤ n) :
-    δ ^ 2 * (almostMaxOfCountOfSquares n) ≤
+    δ * (maxOfGeneralizedCountOfSquares (almostN ⌈δ * n⌉₊) n n) ≤
     generalizedCountOfSquares n S.indicator (δ • (range' n).indicator) := by
   simp only [countOfSquares, generalizedCountOfSquares, range', indicator,
               Pi.smul_apply, smul_eq_mul, coe_Ioc]
-  -- TODO: do almost_sub but with S ∩ range' (almostN n)
+  have almost_sub_S : (S ∩ Ioc 0 (almostN n)) ⊆ Ioc 0 n := by
+    rw [subset_iff]
+    intro x hx
+    simp only [mem_inter] at hx
+    simp only [mem_Ioc] at *
+    obtain ⟨_, hx_lb, hx_ub⟩ := hx
+    constructor
+    · exact hx_lb
+    · simp only [almostN] at hx_ub
+      omega
+
   apply le_trans
   rotate_left
-  · apply sum_le_sum_of_subset_of_nonneg S_subset_of_range'_n
-    intro x _ hxS
+  · apply sum_le_sum_of_subset_of_nonneg almost_sub_S
+    intro _ _ _
     simp only [const_one]
-    apply le_of_eq
-    rw [sum_eq_card_nsmul]
+    apply sum_nonneg
+    intro _ _
+    apply sum_nonneg
+    intro _ _
+    simp only [Set.indicator]
+    norm_cast
+    apply mul_nonneg
+    · apply ite_nonneg
+      · simp only [Pi.one_apply, zero_le_one]
+      · simp only [le_refl]
+    · apply mul_nonneg δ_nonneg
+      apply ite_nonneg
+      · simp only [Pi.one_apply, zero_le_one]
+      · simp only [le_refl]
+  · apply le_trans
     rotate_left
-    · intro _ _
-      rw [sum_eq_card_nsmul]
-      intro _ _
-      rw [mul_eq_zero]
-      left
-      simpa only [Set.indicator_apply_eq_zero, mem_coe, Pi.one_apply, one_ne_zero, imp_false]
-    · simp only [Nat.card_Ioc, tsub_zero, smul_zero]
-  · sorry
+    apply card_nsmul_le_sum
+    intro x hx_S_range'_almost_n
+    apply card_nsmul_le_sum
+    intro y hy
+    apply card_nsmul_le_sum (n := δ)
+    intro z hz
+    simp only [Set.indicator]
+    norm_cast
+    simp only [upperBoundOny, upperBoundOnz, mem_Ioc] at *
+    simp only [const_apply, Set.mem_Ioc, add_pos_iff, mul_ite, mul_one,
+      mul_zero, ite_mul, one_mul, zero_mul]
+    rw [← ite_and]
+    have hx_S : x ∈ S := by exact mem_of_mem_filter x hx_S_range'_almost_n
+    have hx_range' : x ∈ Ioc 0 (almostN n) := by
+      exact mem_of_mem_inter_right hx_S_range'_almost_n
+    apply le_trans
+    rotate_left
+    apply le_of_eq
+    symm
+    apply ite_cond_eq_true
+    simp only [eq_iff_iff, iff_true]
+    constructor
+    · constructor
+      · right
+        apply Nat.pos_pow_of_pos 2
+        omega
+      · simp at hx_range'
+        apply le_trans (b := almostN n + (y + z)^2)
+        · simp only [add_le_add_iff_right]
+          exact hx_range'.2
+        · simp only [almostN]
+          apply Nat.add_le_of_le_sub
+          · nlinarith
+          · refine Nat.sub_le_sub_left ?_ n
+            simp only [upperBoundOny, upperBoundOnz]
+            nlinarith
+    · exact hx_S
+    · simp only [almostMaxOfCountOfSquares, maxOfGeneralizedCountOfSquares]
+      norm_num
+      conv =>
+        rhs
+        ring_nf
+        rw [mul_comm, mul_assoc]
+      conv =>
+        lhs
+        rw [mul_assoc]
+      gcongr
+      apply le_trans (a := almostN ⌈δ * n⌉₊) (b := S.card + n - almostN n)
+      · sorry
+      · simp only [almostN, tsub_le_iff_right, Nat.ceil_le, Nat.cast_add, Nat.cast_pow]
+        sorry
+    · exact Preorder.le_refl δ
 
 -- approach should be the following: do cases. if we have not many fewer than
 -- expected square differences in S, then we are done. otherwise, we can go to a
