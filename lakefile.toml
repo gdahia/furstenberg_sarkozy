@@ -1,0 +1,14 @@
+name = "furstenberg_sarkozy"
+version = "0.1.0"
+defaultTargets = ["furstenberg_sarkozy"]
+
+[[lean_lib]]
+name = "FurstenbergSarkozy"
+
+[[lean_exe]]
+name = "furstenberg_sarkozy"
+root = "Main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
