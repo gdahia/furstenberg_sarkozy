@@ -7,7 +7,7 @@ name = "FurstenbergSarkozy"
 
 [[lean_exe]]
 name = "furstenberg_sarkozy"
-root = "Main"
+root = "FurstenbergSarkozy"
 
 [[require]]
 name = "mathlib"
