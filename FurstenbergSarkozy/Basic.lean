@@ -183,6 +183,56 @@ lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
   · simp only [range', Nat.card_Ioc, tsub_zero, S_is_dense, nsmul_eq_mul]
     nlinarith
 
+lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
+    (n_is_large : (upperBoundOny n + upperBoundOnz n)^2 ≤ n):
+    δ ^ 2 * (n - (upperBoundOny n + upperBoundOnz n)^2) * (upperBoundOny n) * (upperBoundOnz n)
+    ≤ countOfSquares n (δ • (range' n).indicator) := by
+
+  simp only [countOfSquares, generalizedCountOfSquares, range', indicator, coe_Ioc, const_one,
+    Pi.smul_apply, Set.indicator, Set.mem_Ioc, Pi.one_apply, smul_eq_mul, mul_ite, mul_one,
+    mul_zero, add_pos_iff, ite_mul, zero_mul]
+
+  have almost_sub : Ioc 0 (n - (upperBoundOny n + upperBoundOnz n)^2) ⊆ Ioc 0 n := by
+    simp only [Ioc_subset_Ioc_right, Nat.sub_le]
+
+  refine le_trans (le_of_eq ?_) (sum_le_sum_of_subset_of_nonneg almost_sub ?_)
+  · rw [eq_comm, sum_eq_card_nsmul]
+    rotate_left
+    · intro x hx
+      rw [sum_eq_card_nsmul]
+      intro y hy
+      rw [sum_eq_card_nsmul]
+      intro z hz
+      simp only [mem_Ioc] at hx
+      rw [← ite_and, ite_cond_eq_true]
+      simp only [eq_iff_iff, iff_true]
+      constructor
+      · constructor
+        · left
+          exact hx.left
+        · simp [mem_Ioc] at *
+          calc x + (y + z)^2
+            _ ≤ n - (upperBoundOny n + upperBoundOnz n)^2 + (upperBoundOny n + upperBoundOnz n)^2 := by
+              nlinarith
+            _ ≤ _ := by
+              apply Nat.add_le_of_le_sub n_is_large
+              simp only [le_refl]
+      · exact ⟨ hx.left, le_trans hx.right (by omega) ⟩
+    · simp only [Nat.card_Ioc, tsub_zero, nsmul_eq_mul]
+      norm_cast
+      linarith
+  · intro x hx
+    intro hnotx
+    apply sum_nonneg
+    intro y hy
+    apply sum_nonneg
+    intro z hz
+    simp only [mem_Ioc] at hx
+    apply le_trans'
+    · apply inf_le_ite
+    · simp only [le_inf_iff, le_refl, and_true]
+      rw [ite_cond_eq_true (δ * δ) 0 (eq_true hx)]
+      nlinarith
 
 -- approach should be the following: do cases. if we have not many fewer than
 -- expected square differences in S, then we are done. otherwise, we can go to a
