@@ -148,8 +148,7 @@ lemma dense_set_vs_uniform_indicator_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
     rw [← sum_mul, mul_comm]
     apply le_trans (mul_le_mul_of_nonneg_left sum_indicator_supset_le_card δ_is_density.1.le)
     rw [S_is_dense]
-    ring_nf
-    exact le_rfl
+    nlinarith
 
 lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finset ℕ}
     (δ_is_density : δ ∈ unitInterval') (S_is_dense : #S = δ * n) :
@@ -182,8 +181,8 @@ lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
       · simp only [unitInterval', Set.mem_Ioc] at δ_is_density
         exact δ_is_density.1
   · simp only [range', Nat.card_Ioc, tsub_zero, S_is_dense, nsmul_eq_mul]
-    ring_nf
-    simp only [le_refl]
+    nlinarith
+
 
 -- approach should be the following: do cases. if we have not many fewer than
 -- expected square differences in S, then we are done. otherwise, we can go to a
