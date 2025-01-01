@@ -28,7 +28,7 @@ lemma sum_indicator_supset_le_card' {α β : Type} [DecidableEq α] [DecidableEq
   simp only [indicator, Set.indicator, mem_coe, const_apply]
   apply le_trans
   · apply sum_le_sum
-    · intro x hx
+    · intro x _
       apply le_of_eq
       apply ite_congr (c := x ∈ S.preimage f hf)
       · simp only [Finset.mem_preimage, mem_coe]
@@ -53,8 +53,9 @@ lemma sum_indicator_supset_le_card {α : Type} [DecidableEq α] {S T : Finset α
   apply sum_indicator_supset_le_card'
   simp only [Set.preimage_id', Set.InjOn, mem_coe, imp_self, implies_true]
 
-lemma non_zero_countOfSquares_implies_squareDifference (n : ℕ) (S : Finset ℕ)
-     : countOfSquares n S.indicator ≠ 0 → S.containsSquareDifference := by
+lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {S : Finset ℕ}
+    (non_zero_countOfSquares : countOfSquares n S.indicator ≠ 0) : S.containsSquareDifference := by
+  revert non_zero_countOfSquares
   contrapose!
   intro squareDifferenceFree
 
@@ -100,9 +101,9 @@ lemma uniform_indicator_vs_uniform_indicator_upper_bound (n : ℕ) (δ : ℝ) :
     simp only [mem_Ioc] at hx
     simp only [hx, true_or, true_and, and_self, and_true]
     apply sum_le_card_nsmul
-    intro y _
+    intros
     apply sum_le_card_nsmul
-    intro z _
+    intros
     apply ite_le_sup (δ * δ) 0
   · simp only [Nat.card_Ioc, tsub_zero, nsmul_eq_mul]
     ring_nf
@@ -124,12 +125,12 @@ lemma dense_set_vs_uniform_indicator_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
   rw [sum_comm]
   apply le_trans
   · apply sum_le_card_nsmul
-    intro y hy
+    intros
     rw [sum_comm]
     apply sum_le_card_nsmul
-    intro z hz
+    intros
     apply sum_le_sum
-    · intro x hx
+    · intros
       apply mul_le_mul_of_nonneg_left
       · simp only [indicator, range', coe_Ioc, const_one, Pi.smul_apply, Set.indicator,
           Set.mem_Ioc, add_pos_iff, Pi.one_apply, smul_eq_mul, mul_ite, mul_one, mul_zero]
@@ -160,14 +161,14 @@ lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
   rw [sum_comm]
   apply le_trans
   · apply sum_le_card_nsmul
-    intro y hy
+    intro y _
     rw [sum_comm]
     apply sum_le_card_nsmul
-    intro z hz
+    intro z _
 
     have bound_on_uniform_indicator :
         ∀ x ∈ range' n, ((δ • (range' n).indicator) x) * S.indicator (x + (y + z)^2) ≤ δ * S.indicator (x + (y + z)^2) := by
-      intro x hx
+      intros
       gcongr
       · simp only [indicator, Set.indicator, mem_coe, const_apply]
         positivity
@@ -200,9 +201,9 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
     rotate_left
     · intro x hx
       rw [sum_eq_card_nsmul]
-      intro y hy
+      intro y _
       rw [sum_eq_card_nsmul]
-      intro z hz
+      intro z _
       simp only [mem_Ioc] at hx
       rw [← ite_and, ite_cond_eq_true]
       simp only [eq_iff_iff, iff_true]
@@ -224,9 +225,9 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
   · intro x hx
     intro hnotx
     apply sum_nonneg
-    intro y hy
+    intros
     apply sum_nonneg
-    intro z hz
+    intros
     simp only [mem_Ioc] at hx
     apply le_trans'
     · apply inf_le_ite
@@ -239,8 +240,9 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
 -- denser subset by the density increment argument and we show that recursively
 -- calling furstenberg_sarkozy terminates because δ increases and is at most one
 
-theorem furstenberg_sarkozy :
-    ∀ δ ∈ unitInterval', ∃ n₀ : ℕ, ∀ n : ℕ, n ≥ n₀ →
-    ∀ S ⊆ (range' n), δ * n ≤ #S →
-    S.containsSquareDifference :=
+def n₀ {δ : ℝ} (δ_is_density : δ ∈ unitInterval') : ℕ := sorry
+
+theorem furstenberg_sarkozy {n : ℕ} {S : Finset ℕ} {δ : ℝ} 
+    (δ_is_density : δ ∈ unitInterval') (n_is_big : (n₀ δ_is_density) ≤ n)
+    (S_is_dense : δ * n ≤ #(S ∩ (range' n))) : S.containsSquareDifference :=
   sorry
