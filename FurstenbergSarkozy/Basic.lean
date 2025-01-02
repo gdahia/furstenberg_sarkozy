@@ -4,33 +4,33 @@ open Finset Function
 
 def range' (n : ℕ) : Finset ℕ := Ioc 0 n
 
-noncomputable def upperBoundOny (n : ℕ) := ⌈(n ^ (1/3 : ℝ) : ℝ)⌉₊
+noncomputable def maxy (n : ℕ) := ⌈(n ^ (1/3 : ℝ) : ℝ)⌉₊
 
-noncomputable def upperBoundOnz (n : ℕ) := ⌈(n ^ (1/100 : ℝ) : ℝ)⌉₊
+noncomputable def maxz (n : ℕ) := ⌈(n ^ (1/100 : ℝ) : ℝ)⌉₊
 
-noncomputable def generalizedCountOfSquares (n : ℕ) (f₁ f₂ : ℕ → ℝ) : ℝ :=
+noncomputable def countOfSquares' (n : ℕ) (f₁ f₂ : ℕ → ℝ) : ℝ :=
   ∑ x ∈ range' n,
-  ∑ y ∈ range' (upperBoundOny n),
-  ∑ z ∈ range' (upperBoundOnz n), (f₁ x) * (f₂ (x + (y + z)^2))
+  ∑ y ∈ range' (maxy n),
+  ∑ z ∈ range' (maxz n), (f₁ x) * (f₂ (x + (y + z)^2))
 
 noncomputable def countOfSquares (n : ℕ) (f : ℕ → ℝ) : ℝ :=
-  generalizedCountOfSquares n f f
+  countOfSquares' n f f
 
-def Finset.containsSquareDifference (S : Finset ℕ) : Prop :=
-  ∃ d : {d : ℕ // d > 0}, ∃ a ∈ S, a + d ^ 2 ∈ S
+def Finset.containsSquareDifference (s : Finset ℕ) : Prop :=
+  ∃ d : {d : ℕ // d > 0}, ∃ a ∈ s, a + d ^ 2 ∈ s
 
-noncomputable def Finset.indicator {α : Type} [DecidableEq α] (S : Finset α) : α → ℝ :=
-  S.toSet.indicator (const α 1)
+noncomputable def Finset.indicator {α : Type} [DecidableEq α] (s : Finset α) : α → ℝ :=
+  s.toSet.indicator (const α 1)
 
 lemma sum_indicator_supset_le_card' {α β : Type} [DecidableEq α] [DecidableEq β]
-    (S : Finset α) {T : Finset β} {f : β → α} (hf : Set.InjOn f (f ⁻¹' S)) :
-    ∑ x ∈ T, S.indicator (f x) ≤ #S := by
+    (s : Finset α) {t : Finset β} {f : β → α} (hf : Set.InjOn f (f ⁻¹' s)) :
+    ∑ x ∈ t, s.indicator (f x) ≤ #s := by
   simp only [indicator, Set.indicator, mem_coe, const_apply]
   apply le_trans
   · apply sum_le_sum
     · intro x _
       apply le_of_eq
-      apply ite_congr (c := x ∈ S.preimage f hf)
+      apply ite_congr (c := x ∈ s.preimage f hf)
       · simp only [Finset.mem_preimage, mem_coe]
       · intro
         rfl
@@ -38,30 +38,31 @@ lemma sum_indicator_supset_le_card' {α β : Type} [DecidableEq α] [DecidableEq
         rfl
   rw [sum_ite_mem]
   simp only [sum_const, nsmul_eq_mul, mul_one, Nat.cast_le]
-  have T_inter_pre_S_subset_pre_S : T ∩ S.preimage f hf ⊆ S.preimage f hf := by simp only [inter_subset_right]
+  have hts : t ∩ s.preimage f hf ⊆ s.preimage f hf := by simp only [inter_subset_right]
   apply le_trans
-  · apply card_le_card T_inter_pre_S_subset_pre_S
+  · apply card_le_card hts
   · apply card_le_card_of_injOn
     · simp only [mem_preimage]
-      intro _ hfS
-      exact hfS
+      intro _ hfs
+      exact hfs
     · simp only [coe_preimage]
       assumption
 
-lemma sum_indicator_supset_le_card {α : Type} [DecidableEq α] {S T : Finset α} :
-    ∑ x ∈ T, S.indicator x ≤ #S := by
+lemma sum_indicator_supset_le_card {α : Type} [DecidableEq α] {s t : Finset α} :
+    ∑ x ∈ t, s.indicator x ≤ #s := by
   apply sum_indicator_supset_le_card'
   simp only [Set.preimage_id', Set.InjOn, mem_coe, imp_self, implies_true]
 
-lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {S : Finset ℕ}
-    (non_zero_countOfSquares : countOfSquares n S.indicator ≠ 0) : S.containsSquareDifference := by
+lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {s : Finset ℕ}
+    (non_zero_countOfSquares : countOfSquares n s.indicator ≠ 0) :
+    s.containsSquareDifference := by
   revert non_zero_countOfSquares
   contrapose!
   intro squareDifferenceFree
 
   unfold containsSquareDifference at squareDifferenceFree
   push_neg at squareDifferenceFree
-  unfold countOfSquares generalizedCountOfSquares range'
+  unfold countOfSquares countOfSquares' range'
 
   apply sum_eq_zero
   intro x _
@@ -70,14 +71,14 @@ lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {S : Finset ℕ
   apply sum_eq_zero
   intro z hz
 
-  by_cases (x ∈ S)
-  case neg xNotInS =>
+  by_cases (x ∈ s)
+  case neg nothxs =>
     unfold indicator
     simp only [const_one, mul_eq_zero, Set.indicator_apply_eq_zero, mem_coe, Pi.one_apply,
       one_ne_zero, imp_false]
     left
-    exact xNotInS
-  case pos xInS =>
+    exact nothxs
+  case pos hxs =>
     unfold indicator
     simp only [const_one, mul_eq_zero, Set.indicator_apply_eq_zero, mem_coe, Pi.one_apply,
       one_ne_zero, imp_false]
@@ -85,12 +86,12 @@ lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {S : Finset ℕ
     simp only [mem_Ioc] at hy
     simp only [mem_Ioc] at hz
     have ypz_pos : 0 < y + z := by omega
-    exact (squareDifferenceFree ⟨ y + z, ypz_pos ⟩ x xInS)
+    exact (squareDifferenceFree ⟨ y + z, ypz_pos ⟩ x hxs)
 
 lemma uniform_indicator_vs_uniform_indicator_upper_bound (n : ℕ) (δ : ℝ) :
-    countOfSquares n (δ • (range' n).indicator) ≤ δ ^ 2 * n * (upperBoundOny n) * (upperBoundOnz n) := by
+    countOfSquares n (δ • (range' n).indicator) ≤ δ ^ 2 * n * (maxy n) * (maxz n) := by
 
-  simp only [countOfSquares, generalizedCountOfSquares, indicator, range',
+  simp only [countOfSquares, countOfSquares', indicator, range',
     coe_Ioc, const_one, Pi.smul_apply, smul_eq_mul, Nat.cast_mul, Set.indicator,
     Set.mem_Ioc, Pi.one_apply, mul_ite, mul_one, mul_zero, add_pos_iff, ite_mul,
     zero_mul, ←ite_and]
@@ -115,12 +116,12 @@ lemma uniform_indicator_vs_uniform_indicator_upper_bound (n : ℕ) (δ : ℝ) :
 
 noncomputable def unitInterval' := (Set.Ioc (0 : ℝ) (1 : ℝ))
 
-lemma dense_set_vs_uniform_indicator_upper_bound {n : ℕ} {δ : ℝ} {S : Finset ℕ}
-    (δ_is_density : δ ∈ unitInterval') (S_is_dense : #S = δ * n) :
-    generalizedCountOfSquares n S.indicator (δ • (range' n).indicator) ≤
-    δ ^ 2 * n * (upperBoundOny n) * (upperBoundOnz n) := by
+lemma dense_set_vs_uniform_indicator_upper_bound {n : ℕ} {δ : ℝ} {s : Finset ℕ}
+    (hδ : δ ∈ unitInterval') (hs : #s = δ * n) :
+    countOfSquares' n s.indicator (δ • (range' n).indicator) ≤
+    δ ^ 2 * n * (maxy n) * (maxz n) := by
 
-  simp only [generalizedCountOfSquares]
+  simp only [countOfSquares']
 
   rw [sum_comm]
   apply le_trans
@@ -139,24 +140,24 @@ lemma dense_set_vs_uniform_indicator_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
         · simp only [sup_le_iff]
           constructor
           · exact le_rfl
-          · simp only [unitInterval'] at δ_is_density
-            exact δ_is_density.1.le
+          · simp only [unitInterval'] at hδ
+            exact hδ.1.le
       · simp only [indicator, Set.indicator, mem_coe, const_apply]
         positivity
   · simp only [range', Nat.card_Ioc, tsub_zero, nsmul_eq_mul]
     rw [← mul_assoc, mul_comm, mul_assoc]
     refine mul_le_mul ?_ le_rfl (by positivity) (by positivity)
     rw [← sum_mul, mul_comm]
-    apply le_trans (mul_le_mul_of_nonneg_left sum_indicator_supset_le_card δ_is_density.1.le)
-    rw [S_is_dense]
+    apply le_trans (mul_le_mul_of_nonneg_left sum_indicator_supset_le_card hδ.1.le)
+    rw [hs]
     nlinarith
 
-lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finset ℕ}
-    (δ_is_density : δ ∈ unitInterval') (S_is_dense : #S = δ * n) :
-    generalizedCountOfSquares n (δ • (range' n).indicator) S.indicator ≤
-    δ ^ 2 * n * (upperBoundOny n) * (upperBoundOnz n) := by
+lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {s : Finset ℕ}
+    (hδ : δ ∈ unitInterval') (hs : #s = δ * n) :
+    countOfSquares' n (δ • (range' n).indicator) s.indicator ≤
+    δ ^ 2 * n * (maxy n) * (maxz n) := by
 
-  simp only [generalizedCountOfSquares]
+  simp only [countOfSquares']
 
   rw [sum_comm]
   apply le_trans
@@ -166,8 +167,9 @@ lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
     apply sum_le_card_nsmul
     intro z _
 
-    have bound_on_uniform_indicator :
-        ∀ x ∈ range' n, ((δ • (range' n).indicator) x) * S.indicator (x + (y + z)^2) ≤ δ * S.indicator (x + (y + z)^2) := by
+    have h : ∀ x ∈ range' n,
+        ((δ • (range' n).indicator) x) * s.indicator (x + (y + z)^2) ≤
+        δ * s.indicator (x + (y + z)^2) := by
       intros
       gcongr
       · simp only [indicator, Set.indicator, mem_coe, const_apply]
@@ -175,28 +177,28 @@ lemma uniform_indicator_vs_dense_set_upper_bound {n : ℕ} {δ : ℝ} {S : Finse
       · simp_all only [range', mem_Ioc, indicator, coe_Ioc, const_one, Pi.smul_apply, Set.mem_Ioc,
           and_self, Set.indicator_of_mem, Pi.one_apply, smul_eq_mul, mul_one, le_refl]
 
-    apply le_trans (sum_le_sum bound_on_uniform_indicator)
+    apply le_trans (sum_le_sum h)
     · rw [← mul_sum, mul_le_mul_left]
       · apply sum_indicator_supset_le_card'
         · simp only [Set.InjOn, Set.mem_preimage, mem_coe, add_left_inj, imp_self, implies_true]
-      · simp only [unitInterval', Set.mem_Ioc] at δ_is_density
-        exact δ_is_density.1
-  · simp only [range', Nat.card_Ioc, tsub_zero, S_is_dense, nsmul_eq_mul]
+      · simp only [unitInterval', Set.mem_Ioc] at hδ
+        exact hδ.1
+  · simp only [range', Nat.card_Ioc, tsub_zero, hs, nsmul_eq_mul]
     nlinarith
 
-lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
-    (n_is_large : (upperBoundOny n + upperBoundOnz n)^2 ≤ n):
-    δ ^ 2 * (n - (upperBoundOny n + upperBoundOnz n)^2) * (upperBoundOny n) * (upperBoundOnz n)
-    ≤ countOfSquares n (δ • (range' n).indicator) := by
+lemma almost_sub (n : ℕ) : Ioc 0 (n - (maxy n + maxz n)^2) ⊆ Ioc 0 n := by
+  simp only [Ioc_subset_Ioc_right, Nat.sub_le]
 
-  simp only [countOfSquares, generalizedCountOfSquares, range', indicator, coe_Ioc, const_one,
+lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
+    (hn : (maxy n + maxz n)^2 ≤ n) :
+    δ ^ 2 * (n - (maxy n + maxz n)^2) * (maxy n) * (maxz n) ≤
+    countOfSquares n (δ • (range' n).indicator) := by
+
+  simp only [countOfSquares, countOfSquares', range', indicator, coe_Ioc, const_one,
     Pi.smul_apply, Set.indicator, Set.mem_Ioc, Pi.one_apply, smul_eq_mul, mul_ite, mul_one,
     mul_zero, add_pos_iff, ite_mul, zero_mul]
 
-  have almost_sub : Ioc 0 (n - (upperBoundOny n + upperBoundOnz n)^2) ⊆ Ioc 0 n := by
-    simp only [Ioc_subset_Ioc_right, Nat.sub_le]
-
-  refine le_trans (le_of_eq ?_) (sum_le_sum_of_subset_of_nonneg almost_sub ?_)
+  refine le_trans (le_of_eq ?_) (sum_le_sum_of_subset_of_nonneg (almost_sub n) ?_)
   · rw [eq_comm, sum_eq_card_nsmul]
     rotate_left
     · intro x hx
@@ -213,10 +215,10 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
           exact hx.left
         · simp [mem_Ioc] at *
           calc x + (y + z)^2
-            _ ≤ n - (upperBoundOny n + upperBoundOnz n)^2 + (upperBoundOny n + upperBoundOnz n)^2 := by
+            _ ≤ n - (maxy n + maxz n)^2 + (maxy n + maxz n)^2 := by
               nlinarith
             _ ≤ _ := by
-              apply Nat.add_le_of_le_sub n_is_large
+              apply Nat.add_le_of_le_sub hn
               simp only [le_refl]
       · exact ⟨ hx.left, le_trans hx.right (by omega) ⟩
     · simp only [Nat.card_Ioc, tsub_zero, nsmul_eq_mul]
@@ -234,14 +236,22 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
       rw [ite_cond_eq_true (δ * δ) 0 (eq_true hx)]
       nlinarith
 
--- approach should be the following: do cases. if we have not many fewer than
+lemma dense_set_vs_uniform_indicator_lower_bound {n : ℕ} {s : Finset ℕ} {δ : ℝ}
+    (hn : (maxy n + maxz n)^2 ≤ n) (hsn : s ⊆ range' n) (hs : #s = δ * n) :
+    δ ^ 2 * (n - δ * (maxy n + maxz n)^2) * (maxy n) * (maxz n) ≤
+    countOfSquares' n s.indicator (δ • (range' n).indicator) := by
+
+  simp only [countOfSquares', range', indicator, Set.indicator, mem_coe, const_apply,
+    coe_Ioc, const_one, Pi.smul_apply, Set.mem_Ioc, add_pos_iff, Pi.one_apply, smul_eq_mul]
+  sorry
+
 -- expected square differences in S, then we are done. otherwise, we can go to a
 -- denser subset by the density increment argument and we show that recursively
 -- calling furstenberg_sarkozy terminates because δ increases and is at most one
 
 def n₀ {δ : ℝ} (δ_is_density : δ ∈ unitInterval') : ℕ := sorry
 
-theorem furstenberg_sarkozy {n : ℕ} {S : Finset ℕ} {δ : ℝ}
-    (δ_is_density : δ ∈ unitInterval') (n_is_big : (n₀ δ_is_density) ≤ n)
-    (S_is_dense : δ * n ≤ #(S ∩ (range' n))) : S.containsSquareDifference :=
+theorem furstenberg_sarkozy {n : ℕ} {s : Finset ℕ} {δ : ℝ} (hδ : δ ∈ unitInterval')
+    (hn : (n₀ hδ) ≤ n) (hsn : s ⊆ range' n) (hs : δ * n ≤ #s) :
+    s.containsSquareDifference :=
   sorry
