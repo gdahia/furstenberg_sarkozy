@@ -64,11 +64,11 @@ lemma non_zero_countOfSquares_implies_squareDifference {n : ℕ} {S : Finset ℕ
   unfold countOfSquares generalizedCountOfSquares range'
 
   apply sum_eq_zero
-  intros x _
+  intro x _
   apply sum_eq_zero
-  intros y hy
+  intro y hy
   apply sum_eq_zero
-  intros z hz
+  intro z hz
 
   by_cases (x ∈ S)
   case neg xNotInS =>
@@ -222,8 +222,7 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
     · simp only [Nat.card_Ioc, tsub_zero, nsmul_eq_mul]
       norm_cast
       linarith
-  · intro x hx
-    intro hnotx
+  · intro x hx hnotx
     apply sum_nonneg
     intros
     apply sum_nonneg
@@ -242,7 +241,7 @@ lemma uniform_indicator_vs_uniform_indicator_lower_bound {n : ℕ} (δ : ℝ)
 
 def n₀ {δ : ℝ} (δ_is_density : δ ∈ unitInterval') : ℕ := sorry
 
-theorem furstenberg_sarkozy {n : ℕ} {S : Finset ℕ} {δ : ℝ} 
+theorem furstenberg_sarkozy {n : ℕ} {S : Finset ℕ} {δ : ℝ}
     (δ_is_density : δ ∈ unitInterval') (n_is_big : (n₀ δ_is_density) ≤ n)
     (S_is_dense : δ * n ≤ #(S ∩ (range' n))) : S.containsSquareDifference :=
   sorry
